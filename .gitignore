@@ -1,4 +1,4 @@
-# BFSC_Project (repository root). PCAR-sim sources live under pcar-sim/
+# Repository root — PCAR-sim sources under pcar-sim/
 pcar-sim/venv/
 pcar-sim/.venv/
 __pycache__/
