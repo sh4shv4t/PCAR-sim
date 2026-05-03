@@ -128,7 +128,7 @@ Every knob lives in `config.py` (`PCARConfig`). Defaults below match the shipped
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/PCAR-sim.git
+git clone https://github.com/sh4shv4t/PCAR-sim.git
 cd PCAR-sim
 pip install -r requirements.txt
 python main.py
