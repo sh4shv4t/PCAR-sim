@@ -124,13 +124,19 @@ Every knob lives in `config.py` (`PCARConfig`). Defaults below match the shipped
 
 ## Installation
 
+This repository uses a **monorepo layout**: the Git root is the parent project folder (e.g. `BFSC_Project`), and **PCAR-sim** code lives in **`pcar-sim/`**. Run installs and `python main.py` from that subdirectory.
+
 ```bash
-git clone https://github.com/yourusername/PCAR-sim.git
-cd PCAR-sim
+git clone https://github.com/yourusername/<repository>.git
+cd <repository>/pcar-sim
 pip install -r requirements.txt
 ```
 
+If your remote is a standalone **PCAR-sim** repo with sources at the root (no `pcar-sim/` subfolder), clone and run from the repo root instead — adjust paths accordingly.
+
 ## Usage
+
+From the **`pcar-sim/`** directory:
 
 ```bash
 # Run with all defaults (recommended starting point)
@@ -146,7 +152,7 @@ python main.py --dynamic-beta --multipath
 python main.py --beta 1.5 --k 10 --n-payments 1000 --n-nodes 100 --seed 42 --save-results
 ```
 
-Boolean flags: `--multipath`, `--dynamic-beta`, `--save-results`. Additional hyperparameters (`--alpha`, `--gamma`, `--lambda`, …) are documented via `python main.py --help`.
+Boolean flags: `--multipath`, `--dynamic-beta`, `--save-results`. Additional hyperparameters (`--alpha`, `--gamma`, `--lambda`, …) are documented via `python main.py --help`. All paths below (`results/`, etc.) are relative to **`pcar-sim/`**.
 
 ## Outputs
 
