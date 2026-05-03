@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.Python
+.git-split-old-readme.md
+.readme-comprehensive.md
+.venv/
