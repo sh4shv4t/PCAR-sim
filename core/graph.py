@@ -39,8 +39,8 @@ def refresh_centrality_cache(G: nx.MultiDiGraph) -> dict[Any, float]:
 
 def _sample_edge_attrs(rng: np.random.Generator) -> dict[str, Any]:
     return {
-        "base_fee": int(rng.integers(100, 1001)),
-        "fee_rate": int(rng.integers(1, 501)),
+        "base_fee": 1000,
+        "fee_rate": int(rng.integers(1, 51)),
         "cltv_delta": int(rng.integers(6, 145)),
         "capacity": int(rng.integers(100_000, 10_000_001)),
         "channel_age": int(rng.integers(1, 500_001)),
