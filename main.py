@@ -170,7 +170,7 @@ def run_beta_sweep(args: argparse.Namespace) -> None:
 
     out = Path("results/beta_sweep.png")
     saved = build_beta_sweep_figure(betas, ent, anon, fee, adv, out_path=out)
-    print(f"PCAR-sim: beta sweep figure saved to {saved.resolve()}")
+    print(f"PCAR-sim: β sweep figure saved to {saved.resolve()}")
 
 
 def main() -> None:
