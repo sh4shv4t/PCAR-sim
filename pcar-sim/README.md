@@ -56,6 +56,8 @@ Analytical sketches in the PCAR literature sometimes cite order-of-magnitude gai
 
 ## Architecture
 
+In this monorepo, the tree below lives under **`pcar-sim/`** from the Git repository root.
+
 ```
 PCAR-sim/
 ├── main.py               # CLI entry point
