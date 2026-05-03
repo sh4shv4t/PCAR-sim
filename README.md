@@ -56,14 +56,15 @@ Analytical sketches in the PCAR literature sometimes cite order-of-magnitude gai
 
 ## Architecture
 
-In this monorepo, the tree below lives under **`pcar-sim/`** from the Git repository root.
+This repository’s layout matches what GitHub renders on the project home page — **`README.md` sits at the repository root** alongside `main.py` and `config.py`.
 
 ```
-PCAR-sim/
+.
+├── README.md             # This file (repository root)
 ├── main.py               # CLI entry point
+├── LICENSE
 ├── config.py             # All hyperparameters
 ├── requirements.txt
-├── README.md
 ├── core/
 │   ├── graph.py          # Barabási–Albert LN graph generation + centrality cache
 │   ├── routing.py        # Baseline (Dijkstra) + PCAR (Yen's k-SP + softmax)
@@ -126,19 +127,18 @@ Every knob lives in `config.py` (`PCARConfig`). Defaults below match the shipped
 
 ## Installation
 
-This repository uses a **monorepo layout**: the Git root is the parent project folder (e.g. `BFSC_Project`), and **PCAR-sim** code lives in **`pcar-sim/`**. Run installs and `python main.py` from that subdirectory.
-
 ```bash
-git clone https://github.com/yourusername/<repository>.git
-cd <repository>/pcar-sim
+git clone https://github.com/yourusername/PCAR-sim.git
+cd PCAR-sim
 pip install -r requirements.txt
+python main.py
 ```
 
-If your remote is a standalone **PCAR-sim** repo with sources at the root (no `pcar-sim/` subfolder), clone and run from the repo root instead — adjust paths accordingly.
+Use **`PCAR-sim`** as the GitHub repository name so the clone directory matches the project branding; all commands below assume your shell’s current directory is **the repository root** (where `README.md` and `main.py` live).
 
 ## Usage
 
-From the **`pcar-sim/`** directory:
+From the **repository root**:
 
 ```bash
 # Run with all defaults (recommended starting point)
@@ -154,7 +154,7 @@ python main.py --dynamic-beta --multipath
 python main.py --beta 1.5 --k 10 --n-payments 1000 --n-nodes 100 --seed 42 --save-results
 ```
 
-Boolean flags: `--multipath`, `--dynamic-beta`, `--save-results`. Additional hyperparameters (`--alpha`, `--gamma`, `--lambda`, …) are documented via `python main.py --help`. All paths below (`results/`, etc.) are relative to **`pcar-sim/`**.
+Boolean flags: `--multipath`, `--dynamic-beta`, `--save-results`. Additional hyperparameters (`--alpha`, `--gamma`, `--lambda`, …) are documented via `python main.py --help`. Paths such as `results/` are relative to the **repository root**.
 
 ## Outputs
 

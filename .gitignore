@@ -1,5 +1,5 @@
-# Repository root — PCAR-sim sources under pcar-sim/
-pcar-sim/venv/
-pcar-sim/.venv/
 __pycache__/
 *.py[cod]
+.Python
+.venv/
+venv/
