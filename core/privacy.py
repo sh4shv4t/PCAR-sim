@@ -9,6 +9,8 @@ not an orthogonal decomposition.
 
 from __future__ import annotations
 
+# [3] Feigenbaum, Johnson & Syverson (ACM TISSEC 2012) — not Danezis & Syverson
+
 import math
 from collections import deque
 from typing import Any

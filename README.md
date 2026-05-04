@@ -16,30 +16,27 @@ A research-grade simulation demonstrating how probabilistic path sampling improv
 
 - [Overview](#overview)
 - [The Problem](#the-problem)
-- [The Solution: PCAR](#the-solution-pcar)
-- [Architecture](#architecture)
-- [Key Concepts](#key-concepts)
-- [Simulation Parameters](#simulation-parameters)
+- [The Solution](#the-solution)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Results & Interpretation](#results--interpretation)
+- [References](#references)
 
 ## Overview
 
-**PCAR-sim** is a reproducible Monte Carlo sandbox for *Probabilistic Cost-Aware Routing (PCAR)*: Boltzmann-weighted path sampling over candidate Lightning-style routes, with metrics for entropy, fee overhead, and a straw-man deterministic adversary.
-
-Wallets that always minimise cost on a largely public channel graph make routes easy to reproduce; PCAR-sim contrasts that baseline with stochastic routing that spreads probability across acceptable paths so a guess-the-cheapest attacker is wrong more often—at some fee and delay cost.
+**PCAR-sim** is a Monte Carlo sandbox for Probabilistic Cost-Aware Routing (PCAR): it builds synthetic Lightning-style graphs and compares a deterministic cheapest-path baseline to stochastic routing over a menu of feasible routes. Lightning wallets that always minimise advertised cost replay the same optimisation on public gossip data, collapsing the anonymity set to roughly one or two paths regardless of Sphinx-style onion forwarding. PCAR replaces that peaked choice with Boltzmann (softmax) sampling over \(k\) Yen shortest candidates so probability mass spreads across comparable paths at some fee and delay cost. The simulator reports entropy of the softmax distribution, anonymity-set surrogates, fee overhead, success rates, and how often a cheap-path predictor matches the sampled route.
 
 ## The Problem
 
-Routing predictability is the core privacy issue: least-cost routing on a gossiped graph lets an adversary who approximates the same objective narrow the path to a singleton without breaking Sphinx. Onion routing hides hop identifiers from casual observers, but a sharply peaked path distribution collapses the anonymity set before ciphertext tells you much. PCAR-sim pairs a deterministic baseline with PCAR and flags when the cheapest path equals the sampled one—the stand-in for “routing privacy lost to algorithmic replay.”
+Onion routing hides hop-by-hop payloads, but deterministic least-cost routing on a largely public channel graph yields a sharply peaked posterior over paths once the adversary aligns with the wallet’s objective. Predictable paths strip routing anonymity without breaking ciphertext—the adversary’s route guess is pinned before timing or traffic analysis contributes much. PCAR-sim contrasts that baseline with stochastic routing using the same topology and adversary surrogate so entropy and anonymity-set metrics move when sampling does.
 
-## The Solution: PCAR
+## The Solution
 
-PCAR scores **\(k\)** Yen shortest paths using normalised fee, delay, Pickhardt–Richter-style liquidity risk, and a composite privacy penalty \(\Pi(P)\) (popularity, intermediate centrality, and path uniqueness), then samples with \(\Pr[P_i] \propto \exp(-\beta\, C(P_i))\). **\(\beta\)** is the privacy–cost knob: higher \(\beta\) behaves like today’s wallets; lower \(\beta\) flattens the distribution and buys entropy at higher fees or latency. Optional guard relays, \(\beta\) jitter, dynamic \(\beta\) from rolling success, and multipath splits extend the experiment; AMHL-style composition is referenced but not cryptographically simulated. Paper-style analytic magnitudes (e.g. ~\(2^H\) anonymous paths near \(\beta \approx 2\) at ~12 % fee overhead) are upper-bound sketches on stylised assumptions—compare against this simulator, not as mainnet guarantees.
+Candidates are \(k\) shortest loopless paths under a surrogate cost blending fee, delay, liquidity-style risk, and a composite privacy penalty \(\Pi(P)\) over popularity, hub centrality, and path uniqueness (weights \(w_1,w_2,w_3\)). Paths are drawn with softmax sampling, \(\Pr[P_i] \propto \exp(-\beta\, C(P_i))\), where \(\beta\) trades concentration on cheap routes against dispersion. Optional \(\beta\) jitter, guard relays, rolling dynamic \(\beta\), and multipath splitting extend experiments.
 
 ## Architecture
 
-This repository’s layout matches what GitHub renders on the project home page — **`README.md` sits at the repository root** alongside `main.py` and `config.py`.
+Repository layout follows the modular core plus `visualise/` assets below.
 
 ```
 .
@@ -72,8 +69,6 @@ This repository’s layout matches what GitHub renders on the project home page 
 | Guard Node | First hop constrained to low-centrality, long-lived node |
 
 ## Simulation Parameters
-
-Every knob lives in `config.py` (`PCARConfig`). Defaults below match the shipped simulator.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -115,41 +110,31 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Use **`PCAR-sim`** as the GitHub repository name so the clone directory matches the project branding; all commands below assume your shell’s current directory is **the repository root** (where `README.md` and `main.py` live).
-
 ## Usage
-
-From the **repository root**:
 
 ```bash
 # Run with all defaults (recommended starting point)
 python main.py
+```
 
+```bash
 # Run with custom beta and payment count
 python main.py --beta 2.0 --n-payments 500
+```
 
+```bash
 # Enable dynamic-β scheduling and multipath splitting
 python main.py --dynamic-beta --multipath
+```
 
+```bash
 # Full custom run saving results to CSV
 python main.py --beta 1.5 --k 10 --n-payments 1000 --n-nodes 100 --seed 42 --save-results
 ```
 
-Boolean flags: `--multipath`, `--dynamic-beta`, `--save-results`. Additional hyperparameters (`--alpha`, `--gamma`, `--lambda`, …) are documented via `python main.py --help`. Paths such as `results/` are relative to the **repository root**.
-
-## Outputs
-
-- **Console summary** — After the Monte Carlo loop, PCAR-sim prints a formatted **Baseline vs PCAR** table (success rate, entropy, anonymity-set surrogate, fee overhead, average hop count, adversary accuracy).
-- **`results/dashboard.png`** — Dark-themed **3×2** mosaic assembled by `visualise/dashboard.py`.
-- **`results/beta_sweep.png`** — Combined **2×2** figure from `python main.py --beta-sweep` (entropy, adversary accuracy, *2^H*, fee overhead vs *β*).
-- **Standalone figures** — `network_demo.png`, `entropy_lines.png`, `entropy_anon_bar.png`, `entropy_adversary.png`, `tradeoff_scatter.png`, `tradeoff_beta_success.png`, `tradeoff_rank_hist.png`.
-- **`results/metrics.csv`** (optional) — Paired per-payment logs when `--save-results` is passed.
-
 ## Results & Interpretation
 
-The dashboard contrasts hub topology and exemplar routes (green = sampled PCAR, red = cheapest path), rolling adversary accuracy, fee–anonymity scatter, success vs *β*, and Yen rank histograms. The analytic table below is a paper-style upper bound; **`python main.py --beta-sweep --n-payments 500 --seed 42`** prints a console summary and **`results/beta_sweep.png`** for the same *β* grid on this simulator.
-
-Analytical reference table (upper-bound approximations; uniform distinguishability idealisation):
+The table below shows analytical upper-bound estimates from the paper. Run `python main.py --beta-sweep` to generate an empirical version on the synthetic graph.
 
 | \(\beta\) | \(H\) (bits) | Est. anonymity set | Fee overhead |
 |-----------|--------------|-------------------|--------------|
@@ -159,23 +144,21 @@ Analytical reference table (upper-bound approximations; uniform distinguishabili
 | 1.0 | 1.97 | ≈ 20 | ~ 21 % |
 | 0.5 | 2.18 | ≈ 35 | ~ 38 % |
 
-## Limitations & Honest Caveats
+## Limitations
 
-- **Synthetic topology** — PCAR-sim uses Barabási–Albert–style random graphs, not a labelled snapshot of mainnet; hub concentration, channel sizes, and liquidity drift may differ materially from production.
-- **Privacy metrics are coarse** — Shannon entropy and \(2^{H}\) are exploratory indicators, not rigorous anonymity guarantees under joint statistical attacks or adaptive probing.
-- **Threat model gaps** — Global passive adversaries, ISP-level correlation, Bitcoin-layer clustering, and wallet fingerprinting beyond routing are **not** modeled end-to-end here.
-- **Dynamic \(\beta\) scheduling** — Adapting \(\beta\) from rolling success leaks temporal structure unless smoothed or coupled with additional noise; production deployments would need deliberate mitigation.
-- **Fees vs analytic reference** — Initial runs using a wide synthetic fee range (1–500 ppm) produced fee overhead of ~80%, significantly above the paper’s analytical estimate of ~12% at \(\beta=2\). After calibrating edge parameters to real LN mainnet values (base fee 1000 msat, fee rate 1–50 ppm), fee overhead dropped to approximately **62.7%** on a representative run (`python main.py --beta 2.0 --n-payments 500 --seed 42`), closer in spirit to separating “cheap” from “sampled” paths but still above ~12% because the graph and payment model remain synthetic—validation on a real LN snapshot remains future work.
+- Synthetic Barabási–Albert graphs differ from labelled mainnet topology, capacities, and liquidity evolution.
+- Entropy and \(2^{H}\) are exploratory indicators, not formal anonymity guarantees under joint or adaptive attackers.
+- End-to-end threats such as passive global observers, ISP correlation, Bitcoin-layer clustering, or wallet fingerprinting are not modeled.
 
 ## References
 
-- **Kappos et al.** — Empirical privacy analysis of the Lightning Network (*Financial Cryptography, FC 2021*).
-- **Kumble et al.** — Formal discussion of routing-anonymity collapse under deterministic policies (*ARES 2021*).
-- **Malavolta et al.** — Anonymous Multi-Hop Locks (*NDSS 2019*).
-- **Pickhardt & Richter** — Optimal reliable payment flows / liquidity diagnostics (*arXiv 2021*).
-- **Rohrer & Tschorsch** — HTLC timelock inference and privacy implications (*AFT 2020*).
-- **Danezis & Syverson** — UC-framework analysis of onion routing (*ACM TISSEC 2012*).
+1. G. Kappos et al., empirical privacy analysis of the Lightning Network, *Financial Cryptography (FC)*, 2021.
+2. S. Kumble et al., routing-anonymity collapse under deterministic policies, *ARES*, 2021.
+3. J. Feigenbaum, A. Johnson, and P. Syverson, "Probabilistic analysis of onion routing in a black-box model," *ACM Transactions on Information and System Security (TISSEC)*, vol. 15, no. 3, Nov. 2012.
+4. G. Malavolta et al., Anonymous Multi-Hop Locks, *NDSS*, 2019.
+5. R. Pickhardt & S. Richter, optimal reliable payment flows / liquidity diagnostics, *arXiv*, 2021.
+6. E. Rohrer \& F. Tschorsch, HTLC timelock inference and privacy implications, *AFT*, 2020.
 
 ## License
 
-Released under the **MIT License** — see the [`LICENSE`](LICENSE) file.
+MIT License.

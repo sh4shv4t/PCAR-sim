@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+# [3] Feigenbaum, Johnson & Syverson (ACM TISSEC 2012) — not Danezis & Syverson
 from pathlib import Path
 
 import matplotlib.pyplot as plt
